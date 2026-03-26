@@ -37,3 +37,5 @@ The dataset used in this project is the **Credit Card Fraud Detection** dataset 
 
 ## 👨‍💻 Author
 Mayur Rathod
+## 🚀 Live Demo
+👉 [Click here to try the API](https://credit-card-fraud-detection-k0gz.onrender.com/docs)
