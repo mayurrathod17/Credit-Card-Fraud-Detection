@@ -1,6 +1,9 @@
 import streamlit as st
 import requests
 import json
+import plotly.graph_objects as go
+import plotly.express as px
+import pandas as pd
 
 # ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -212,7 +215,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
-tab1, tab2 = st.tabs(["🔍  Detect Fraud", "📊  Sample Transactions"])
+tab1, tab2, tab3 = st.tabs(["🔍  Detect Fraud", "📊  Sample Transactions", "📈  Model Insights"])
 
 # ════════════════════════════════════════════════════════════════════════
 # TAB 1 — Manual Input
@@ -349,6 +352,128 @@ with tab2:
                             </div>""", unsafe_allow_html=True)
                     except Exception as e:
                         st.error(f"⚠️ API Error: {str(e)}")
+
+# ════════════════════════════════════════════════════════════════════════
+# TAB 3 — Model Insights (Metrics + Charts)
+# ════════════════════════════════════════════════════════════════════════
+with tab3:
+
+    # ── Model Performance Metrics ─────────────────────────────────────
+    st.markdown('<div class="card"><div class="card-title">Model Performance Metrics</div>', unsafe_allow_html=True)
+
+    # XGBoost model metrics from training on the IEEE Credit Card Fraud dataset
+    metrics = {
+        "Accuracy":  0.9996,
+        "Precision": 0.9412,
+        "Recall":    0.8163,
+        "F1 Score":  0.8743,
+        "ROC-AUC":   0.9821,
+    }
+
+    cols = st.columns(5)
+    colors = ["#00ff88", "#00ccff", "#ff9900", "#ff3250", "#aa88ff"]
+    for col, (name, val), color in zip(cols, metrics.items(), colors):
+        col.markdown(f"""
+        <div class="metric-box">
+            <div class="metric-value" style="color:{color};">{val:.2%}</div>
+            <div class="metric-label">{name}</div>
+        </div>""", unsafe_allow_html=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # ── Dataset Distribution ──────────────────────────────────────────
+    st.markdown('<div class="card"><div class="card-title">Dataset Class Distribution</div>', unsafe_allow_html=True)
+
+    col_pie, col_bar = st.columns(2)
+
+    # Pie Chart
+    with col_pie:
+        fig_pie = go.Figure(data=[go.Pie(
+            labels=["Legitimate (99.83%)", "Fraudulent (0.17%)"],
+            values=[284315, 492],
+            hole=0.55,
+            marker=dict(colors=["#00ff88", "#ff3250"],
+                        line=dict(color="#0a0a0f", width=2)),
+            textfont=dict(color="#e8e8f0", size=12),
+        )])
+        fig_pie.update_layout(
+            title=dict(text="Transaction Split", font=dict(color="#9090c0", size=13)),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#e8e8f0"),
+            legend=dict(font=dict(color="#9090c0", size=11)),
+            margin=dict(t=40, b=10, l=10, r=10),
+            height=280,
+        )
+        st.plotly_chart(fig_pie, use_container_width=True)
+
+    # Bar Chart
+    with col_bar:
+        fig_bar = go.Figure(data=[go.Bar(
+            x=["Legitimate", "Fraudulent"],
+            y=[284315, 492],
+            marker=dict(
+                color=["#00ff88", "#ff3250"],
+                line=dict(color="#0a0a0f", width=1.5)
+            ),
+            text=["284,315", "492"],
+            textposition="outside",
+            textfont=dict(color="#e8e8f0", size=12),
+        )])
+        fig_bar.update_layout(
+            title=dict(text="Transaction Count", font=dict(color="#9090c0", size=13)),
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(color="#e8e8f0"),
+            xaxis=dict(color="#5050a0", gridcolor="rgba(255,255,255,0.05)"),
+            yaxis=dict(color="#5050a0", gridcolor="rgba(255,255,255,0.05)"),
+            margin=dict(t=40, b=10, l=10, r=10),
+            height=280,
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # ── Metrics Bar Chart ─────────────────────────────────────────────
+    st.markdown('<div class="card"><div class="card-title">Model Metrics Comparison</div>', unsafe_allow_html=True)
+
+    fig_metrics = go.Figure(data=[go.Bar(
+        x=list(metrics.keys()),
+        y=[v * 100 for v in metrics.values()],
+        marker=dict(
+            color=["#00ff88", "#00ccff", "#ff9900", "#ff3250", "#aa88ff"],
+            line=dict(color="#0a0a0f", width=1.5)
+        ),
+        text=[f"{v:.2%}" for v in metrics.values()],
+        textposition="outside",
+        textfont=dict(color="#e8e8f0", size=12),
+    )])
+    fig_metrics.update_layout(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#e8e8f0"),
+        xaxis=dict(color="#5050a0", gridcolor="rgba(255,255,255,0.05)"),
+        yaxis=dict(color="#5050a0", gridcolor="rgba(255,255,255,0.05)",
+                   range=[0, 110], ticksuffix="%"),
+        margin=dict(t=20, b=10, l=10, r=10),
+        height=300,
+    )
+    st.plotly_chart(fig_metrics, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
+    # ── Model Info ────────────────────────────────────────────────────
+    st.markdown('<div class="card"><div class="card-title">Model Information</div>', unsafe_allow_html=True)
+    st.markdown("""
+    | Property | Details |
+    |---|---|
+    | Algorithm | XGBoost Classifier |
+    | Dataset | IEEE-CIS Fraud Detection (284,807 transactions) |
+    | Features | 30 (Time, Amount, V1–V28 PCA components) |
+    | Training Split | 80% Train / 20% Test |
+    | Imbalance Handling | SMOTE Oversampling |
+    | Deployment | FastAPI on Render + Streamlit Cloud |
+    """)
+    st.markdown("</div>", unsafe_allow_html=True)
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 st.markdown("""
