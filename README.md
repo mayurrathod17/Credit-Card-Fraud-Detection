@@ -8,7 +8,10 @@ This project detects fraudulent credit card transactions using Machine Learning.
 - Scikit-learn
 - Pandas
 - NumPy
-  
+- 
+  ## 🚀 Live Demo
+👉 [Click here to try the API](https://credit-card-fraud-detection-k0gz.onrender.com/docs)
+
 ## 📦 Dataset
 
 The dataset used in this project is the **Credit Card Fraud Detection** dataset from Kaggle.
@@ -33,7 +36,8 @@ The dataset used in this project is the **Credit Card Fraud Detection** dataset 
 2. Run notebook / script
 
 ## 📸 Output
-(Add screenshots)
+(<img width="920" height="990" alt="image" src="https://github.com/user-attachments/assets/c100eef4-8f2b-4529-881b-81f0ada70fdc" />
+)
 
 ## 👨‍💻 Author
 Mayur Rathod
