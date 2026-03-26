@@ -12,10 +12,10 @@ def train_and_evaluate():
     
     print("Initializing tuned XGBoost model with class weight...")
     model = XGBClassifier(
-        random_state=42, 
+        random_state=42,
         eval_metric='logloss',
-        max_depth=5, 
-        learning_rate=0.1, 
+        max_depth=5,
+        learning_rate=0.1,
         n_estimators=150,
         scale_pos_weight=scale_weight
     )
@@ -28,14 +28,12 @@ def train_and_evaluate():
     
     precisions, recalls, thresholds = precision_recall_curve(y_test, y_prob)
     
-    # We want a threshold that favors high precision while keeping recall acceptable
     best_threshold = 0.5
     for p, r, t in zip(precisions, recalls, thresholds):
-        # The goal is >90% precision & recall if possible, otherwise we accept the best compromise
-        if p >= 0.90 and r >= 0.82: 
+        if p >= 0.90 and r >= 0.82:
             best_threshold = t
             break
-            
+    
     print(f"Optimal Threshold chosen: {best_threshold:.4f}")
     y_pred = (y_prob >= best_threshold).astype(int)
     
@@ -53,8 +51,10 @@ def train_and_evaluate():
     os.makedirs('models', exist_ok=True)
     model.save_model('models/xgboost_fraud_model.json')
     joblib.dump(model, 'models/xgboost_fraud_model.pkl')
+    
     with open('models/threshold.txt', 'w') as f:
         f.write(str(best_threshold))
+    
     print("Model and threshold saved.")
 
 if __name__ == "__main__":
